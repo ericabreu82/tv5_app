@@ -1,0 +1,31 @@
+This is the App Plugins for TerraView 5 GIS version 5.0
+====================================================
+
+Documents:
+----------
+
+BUILD-INSTRUCTIONS  Notes on how to compile and install in some platforms.
+
+COPYING             Licence statement in plain txt format.
+
+COPYING.html        Licence statement in HTML format.
+
+Directories:
+------------
+
+build       Contains the CMake scripts with commands, macros and functions 
+			      used to build the environment for compiling libraries and executables
+			      in different platforms using the CMake tool.
+               
+src         Contains the source code of App plugins.
+            In the root of each subdir there is a file called
+            README.txt with notes about each module.
+
+Bug reporting:
+------------------------------------
+
+Any problems encountered should be reported to the email eric@dpi.inpe.br
+
+
+                   @-Eric Silva Abreu-@
+                    <eric@dpi.inpe.br>

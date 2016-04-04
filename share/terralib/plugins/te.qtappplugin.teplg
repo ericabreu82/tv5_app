@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<PluginInfo xmlns:xlink="http://www.w3.org/1999/xlink"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://www.terralib.org/schemas/plugin"
+            xsd:schemaLocation="http://www.terralib.org/schemas/plugin ../schemas/terralib/plugin/plugin_info.xsd"
+            version="5.0.0-rc"
+            release="2013-01-01"
+            engine="C++">
+  <Name>te.qt.appplugin</Name>
+  <DisplayName>APP Plugin</DisplayName>
+  <Description>This plugin has algorithms for permanent preservation area.</Description>
+  <TerraLibVersion>5.0.0</TerraLibVersion>
+  <License xlink:href="http://www.gnu.org/licenses/lgpl-3.0-standalone.html">GNU Lesser General Public License v 3.0</License>
+  <Category>3rd Party</Category>
+  <Site xlink:href="http://www.dpi.inpe.br/terralib5/wiki/doku.php?id=wiki:designimplementation"></Site>
+  <Provider>
+    <Name>Eric Silva Abreu</Name>
+    <Site xlink:href="http://www.terralib.org/"></Site>
+    <Email>eric@dpi.inpe.br</Email>
+  </Provider>  <Resources>
+    <Resource name="SharedLibraryName" xlink:href="app_plugin"/>
+    <Resource name="LangFile" xlink:href="pt.br"/>
+  </Resources>
+</PluginInfo>

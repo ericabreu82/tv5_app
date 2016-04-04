@@ -1,0 +1,48 @@
+  App Plugins Build Instructions
+  ===========================
+  
+Compilando o plugin
+
+- Instalar uma versão da TerraLib5.0 (debug e/ou release)
+
+- Apontar a variavel do cmake "terralib_DIR" para a pasta ".../terralib5.0.0-rc-debug/lib/cmake/terralib-5.0.0"
+
+- Alterar o arquivo "terralib-config.cmake" da versao instalada, acrescentando mais um path - "${_prefix}/include/terralib"
+
+- Versao instalada não esta copiando as dll's corretas em debug do Qt
+
+============================================================================================================================
+Executando o plugin no visual studio (debug)
+
+- ao fim do processo de compilacao serao copiados automaticamente arquivos do plugin para a pasta da versao instalada
+	
+	- dll do plugin
+
+	- xml do plugin
+
+- algumas propriedades precisam ser definidas no projeto principal do plugin para que possa ser executado de dentro do msvc
+
+	- Debugging
+
+		- Command: ...\terralib5.X.X\bin\terraview.exe
+
+		- Working Directory: ...\terralib5.X.X\bin
+
+		- Environment: PATH=%PATH%;.../terralib5.X.X/bin;C:/Qt/Qt5.4.1/5.4/msvc2013_64_opengl/bin
+
+=============================================================================================================================
+Instalar o TerraView utilizando o arquivo: TerraView-5.X.X-win64_release.exe
+
+Depois copiar o arquivo: te.qt.appplugins.teplg para a pasta de instalação do terraview - ...terralib5.X.X\share\terralib\plugins
+
+Depois copiar o arquivo: app_plugins.dll para a pasta de instalacao do terraview - ...terralib5.X.X\bin
+
+Lembrar de apagar as pastas do sistema referentes ao TerraView:
+
+ - C:\Users\*****\AppData\Local\terraview
+
+ - C:\Users\*****\AppData\Roaming\INPE
+
+
+Para as proximas versões será necessário apenas substituir a dll do plugin (app_plugins.dll).
+

@@ -1,0 +1,111 @@
+/*  Copyright (C) 2011-2012 National Institute For Space Research (INPE) - Brazil.
+
+    This file is part of the TerraLib - a Framework for building GIS enabled applications.
+
+    TerraLib is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License,
+    or (at your option) any later version.
+
+    TerraLib is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with TerraLib. See COPYING. If not, write to
+    TerraLib Team at <terralib-team@terralib.org>.
+ */
+
+/*!
+  \file terralib/app/qt/AppMainWindowDialog.h
+
+  \brief A dialog used to access the app methods.
+*/
+
+#ifndef __TERRALIB_APP_INTERNAL_APPMAINWINDOWDIALOG_H
+#define __TERRALIB_APP_INTERNAL_APPMAINWINDOWDIALOG_H
+
+#include "../Config.h"
+
+// TerraLib
+#include <terralib/maptools/AbstractLayer.h>
+
+// Qt
+#include <QDialog>
+#include <QGridLayout>
+
+// STL
+#include <memory>
+
+namespace Ui { class AppMainWindowDialogForm; }
+
+// Forward declarations
+
+namespace te
+{
+  namespace app
+  {
+// Forward declarations
+
+    class APPPLUGINDLLEXPORT AppMainWindowDialog : public QDialog
+    {
+      Q_OBJECT
+
+      public:
+
+        AppMainWindowDialog(QWidget* parent = 0, Qt::WindowFlags f = 0);
+
+        ~AppMainWindowDialog();
+
+      public:
+
+        /*!
+          \brief This method is used to set the list of layers
+         
+        */
+        void setLayerList(std::list<te::map::AbstractLayerPtr>& layerList);
+
+        te::map::AbstractLayerPtr getOutputLayer();
+
+      protected slots:
+
+        void onElevationToolButtonClicked();
+
+        void onHighSlopeToolButtonClicked();
+
+        void onVeredasToolButtonClicked();
+
+        void onLakesToolButtonClicked();
+
+        void onPlateausToolButtonClicked();
+
+        void onHeadwaterToolButtonClicked();
+
+        void onWatercourseToolButtonClicked();
+
+        void onRidgeLinesToolButtonClicked();
+
+        void onHillTopToolButtonClicked();
+
+        void onOperationFinished(bool ok);
+
+        void onCreateLayer(const std::string& driverName, const std::map<std::string, std::string>& connInfo);
+
+      private:
+
+        std::auto_ptr<Ui::AppMainWindowDialogForm> m_ui;
+
+        std::list<te::map::AbstractLayerPtr> m_layerList;
+
+        te::map::AbstractLayerPtr m_outputLayer;
+
+        QWidget* m_currentWidget;
+
+        QGridLayout* m_layout;
+
+    };
+  }   // end namespace app
+}     // end namespace te
+
+#endif  // __TERRALIB_APP_INTERNAL_APPMAINWINDOWDIALOG_H
