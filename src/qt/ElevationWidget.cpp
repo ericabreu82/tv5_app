@@ -33,6 +33,7 @@
 #include <terralib/common/Exception.h>
 #include <terralib/dataaccess/utils/Utils.h>
 #include <terralib/qt/widgets/progress/ProgressViewerDialog.h>
+#include <terralib/qt/widgets/Utils.h>
 
 // Qt
 #include <QFileDialog>
@@ -50,7 +51,6 @@ te::app::ElevationWidget::ElevationWidget(QWidget* parent)
 
   m_ui->m_elevationLineEdit->setValidator(new QDoubleValidator(this));
 
-  connect(m_ui->m_layersComboBox, SIGNAL(activated(int)), this, SLOT(onLayerComboBoxActivated(int)));
   connect(m_ui->m_fileToolButton, SIGNAL(clicked()), this, SLOT(onFileToolButtonClicked()));
 }
 
@@ -75,38 +75,11 @@ void te::app::ElevationWidget::setLayerList(std::list<te::map::AbstractLayerPtr>
 
     ++it;
   }
-
-  if(m_ui->m_layersComboBox->count() > 0)
-    onLayerComboBoxActivated(0);
-}
-
-void te::app::ElevationWidget::onLayerComboBoxActivated(int index)
-{
-  //get layer
-  QVariant varLayer = m_ui->m_layersComboBox->itemData(index, Qt::UserRole);
-  te::map::AbstractLayerPtr l = varLayer.value<te::map::AbstractLayerPtr>();
-
-  if(!l.get())
-    return;
-
-  //get raster
-  std::auto_ptr<te::da::DataSet> ds = l->getData();
-  std::size_t rpos = te::da::GetFirstPropertyPos(ds.get(), te::dt::RASTER_TYPE);
-  std::auto_ptr<te::rst::Raster> rst = ds->getRaster(rpos);
-
-  //fill band info
-  if(rst.get())
-  {
-    m_ui->m_bandsComboBox->clear();
-
-    for(std::size_t t = 0; t < rst->getNumberOfBands(); ++t)
-      m_ui->m_bandsComboBox->addItem(QString::number(t));
-  }
 }
 
 void te::app::ElevationWidget::onFileToolButtonClicked()
 {
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save data to File"), "", tr("Shape File (*.shp *.SHP)"));
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save data to File"), te::qt::widgets::GetFilePathFromSettings("AppPlugin"), tr("Shape File (*.shp *.SHP)"));
 
   if (fileName.isEmpty())
     return;
@@ -115,6 +88,8 @@ void te::app::ElevationWidget::onFileToolButtonClicked()
 
   if(file.suffix().isEmpty())
     fileName.append(".shp");
+
+  te::qt::widgets::AddFilePathToSettings(file.absolutePath(), "AppPlugin");
 
   m_ui->m_fileLineEdit->setText(fileName);
 }
@@ -174,7 +149,7 @@ void te::app::ElevationWidget::execute()
   }
 
   //get band
-  int band = m_ui->m_bandsComboBox->currentText().toInt();
+  int band = 0;
 
   //run operation
   te::qt::widgets::ProgressViewerDialog* pViewer = new te::qt::widgets::ProgressViewerDialog(this);
@@ -195,6 +170,19 @@ void te::app::ElevationWidget::execute()
     outputParameters.m_createdOutDSName = dataSetName;
     outputParameters.m_createdOutInfo = connInfo;
     outputParameters.m_createdOutDSType = dataType;
+
+    if (m_ui->m_outRasterCheckBox->isChecked())
+    {
+      std::string path = file.absolutePath().toStdString();
+
+      std::string dataSetName = file.baseName().toStdString();
+
+      std::map<std::string, std::string> rasterConnInfo;
+      rasterConnInfo["URI"] = path + std::string("/") + dataSetName + std::string(".tif");
+
+      outputParameters.m_createdOutRasterDSType = "GDAL";
+      outputParameters.m_createdOutRasterInfo = rasterConnInfo;
+    }
 
     // execute the algorithm
     te::app::Elevation elevation;

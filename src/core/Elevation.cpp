@@ -149,36 +149,38 @@ bool te::app::Elevation::execute(AlgorithmOutputParameters& outputParams) throw(
     throw(te::common::Exception("Output raster creation error."));
   }
 
-  // Execute the operation
-  te::common::TaskProgress task("Generating Elevation APP");
-  task.setTotalSteps(m_inputParameters.m_inRasterPtr->getNumberOfRows());
-
-  for(unsigned int i = 0; i < m_inputParameters.m_inRasterPtr->getNumberOfRows(); ++i)
   {
-    for(unsigned int j = 0; j < m_inputParameters.m_inRasterPtr->getNumberOfColumns(); ++j)
+    // Execute the operation
+    te::common::TaskProgress task("Generating Elevation APP");
+    task.setTotalSteps(m_inputParameters.m_inRasterPtr->getNumberOfRows());
+
+    for (unsigned int i = 0; i < m_inputParameters.m_inRasterPtr->getNumberOfRows(); ++i)
     {
-      double value;
-
-      m_inputParameters.m_inRasterPtr->getValue(j, i, value, m_inputParameters.m_inRasterBand);
-
-      if(value >= m_inputParameters.m_elevationValue)
+      for (unsigned int j = 0; j < m_inputParameters.m_inRasterPtr->getNumberOfColumns(); ++j)
       {
-        m_outputParametersPtr->m_createdOutRasterPtr->setValue(j, i, 0., 0);
+        double value;
+
+        m_inputParameters.m_inRasterPtr->getValue(j, i, value, m_inputParameters.m_inRasterBand);
+
+        if (value >= m_inputParameters.m_elevationValue)
+        {
+          m_outputParametersPtr->m_createdOutRasterPtr->setValue(j, i, 0., 0);
+        }
+        else
+        {
+          m_outputParametersPtr->m_createdOutRasterPtr->setValue(j, i, 255., 0);
+        }
       }
-      else
+
+      if (!task.isActive())
       {
-        m_outputParametersPtr->m_createdOutRasterPtr->setValue(j, i, 255., 0);
+        m_logMsg = "Operation canceled.";
+
+        return false;
       }
+
+      task.pulse();
     }
-
-    if(!task.isActive())
-    {
-      m_logMsg = "Operation canceled.";
-
-      return false;
-    }
-
-    task.pulse();
   }
 
   //create vector representation
