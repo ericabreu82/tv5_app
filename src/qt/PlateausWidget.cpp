@@ -32,7 +32,9 @@
 #include <terralib/common/progress/ProgressManager.h>
 #include <terralib/common/Exception.h>
 #include <terralib/dataaccess/utils/Utils.h>
+#include <terralib/raster/Grid.h>
 #include <terralib/qt/widgets/progress/ProgressViewerDialog.h>
+#include <terralib/qt/widgets/Utils.h>
 
 // Qt
 #include <QFileDialog>
@@ -79,7 +81,7 @@ void te::app::PlateausWidget::setLayerList(std::list<te::map::AbstractLayerPtr>&
 
 void te::app::PlateausWidget::onFileToolButtonClicked()
 {
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save data to File"), "", tr("Shape File (*.shp *.SHP)"));
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save data to File"), te::qt::widgets::GetFilePathFromSettings("AppPlugin"), tr("Shape File (*.shp *.SHP)"));
 
   if (fileName.isEmpty())
     return;
@@ -88,6 +90,8 @@ void te::app::PlateausWidget::onFileToolButtonClicked()
 
   if(file.suffix().isEmpty())
     fileName.append(".shp");
+
+  te::qt::widgets::AddFilePathToSettings(file.absolutePath(), "AppPlugin");
 
   m_ui->m_fileLineEdit->setText(fileName);
 }
@@ -152,27 +156,6 @@ void te::app::PlateausWidget::execute()
     return;
   }
 
-  int idxSlope = m_ui->m_slopeLayerComboBox->currentIndex();
-  QVariant varSlopeLayer = m_ui->m_slopeLayerComboBox->itemData(idxSlope, Qt::UserRole);
-  te::map::AbstractLayerPtr slopeLayer = varSlopeLayer.value<te::map::AbstractLayerPtr>();
-
-  if(!slopeLayer.get())
-  {
-    QMessageBox::warning(this, tr("Warning"), tr("Invalid Slope layer selected."));
-    return;
-  }
-
-  std::auto_ptr<te::da::DataSet> slopeDs = slopeLayer->getData();
-  std::size_t slopePos = te::da::GetFirstPropertyPos(slopeDs.get(), te::dt::RASTER_TYPE);
-  std::auto_ptr<te::rst::Raster> slopeRst = slopeDs->getRaster(slopePos);
-
-  if(!slopeRst.get())
-  {
-    QMessageBox::warning(this, tr("Warning"), tr("Selected Slope layer does not have raster representation."));
-    return;
-  }
-
-
   //run operation
   te::qt::widgets::ProgressViewerDialog* pViewer = new te::qt::widgets::ProgressViewerDialog(this);
   int id = te::common::ProgressManager::getInstance().addViewer(pViewer);
@@ -186,7 +169,40 @@ void te::app::PlateausWidget::execute()
     te::app::Plateaus::InputParameters inputParameters;
     inputParameters.m_bufferDistance = bufferValue;
     inputParameters.m_demRasterPtr = rst.get();
-    inputParameters.m_slopeRasterPtr = slopeRst.get();
+
+
+    if (m_ui->m_layerSlopeCheckBox->isChecked())
+    {
+      int idxSlope = m_ui->m_slopeLayerComboBox->currentIndex();
+      QVariant varSlopeLayer = m_ui->m_slopeLayerComboBox->itemData(idxSlope, Qt::UserRole);
+      te::map::AbstractLayerPtr slopeLayer = varSlopeLayer.value<te::map::AbstractLayerPtr>();
+
+      if (!slopeLayer.get())
+      {
+        QMessageBox::warning(this, tr("Warning"), tr("Invalid Slope layer selected."));
+        return;
+      }
+
+      std::auto_ptr<te::da::DataSet> slopeDs = slopeLayer->getData();
+      std::size_t slopePos = te::da::GetFirstPropertyPos(slopeDs.get(), te::dt::RASTER_TYPE);
+      std::auto_ptr<te::rst::Raster> slopeRst = slopeDs->getRaster(slopePos);
+
+      if (!slopeRst.get())
+      {
+        QMessageBox::warning(this, tr("Warning"), tr("Selected Slope layer does not have raster representation."));
+        return;
+      }
+
+      te::rst::Raster* rasterSlope = slopeRst.release();
+
+      if (rasterSlope->getSRID() == 0)
+      {
+        // Gets SRID from layer object
+        rasterSlope->getGrid()->setSRID(slopeLayer->getSRID());
+      }
+
+      inputParameters.m_slopeRasterPtr = rasterSlope;
+    }
 
     te::app::Plateaus::OutputParameters outputParameters;
     outputParameters.m_createdOutDSName = dataSetName;

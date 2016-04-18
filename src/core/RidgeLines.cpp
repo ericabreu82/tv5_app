@@ -148,6 +148,11 @@ bool te::app::RidgeLines::execute(AlgorithmOutputParameters& outputParams) throw
     return false;
   }
 
+  if (!m_inputParameters.m_slopeRasterPtr)
+  {
+    m_inputParameters.m_slopeRasterPtr = te::app::CalculateSlope(m_inputParameters.m_demRasterPtr).release();
+  }
+
   ////first create slope mask
   //std::auto_ptr<te::rst::Raster> slopeMask = createSlopeMask(0.1);
 
@@ -200,6 +205,8 @@ bool te::app::RidgeLines::execute(AlgorithmOutputParameters& outputParams) throw
   //create vector representation
   //te::app::Raster2Vector(rasterPeaksApp.get(), 0,  m_outputParametersPtr->m_createdOutDSName, m_outputParametersPtr->m_createdOutDSType,  m_outputParametersPtr->m_createdOutInfo);
 
+  delete m_inputParameters.m_slopeRasterPtr;
+
   return true;
 }
 
@@ -223,13 +230,6 @@ bool te::app::RidgeLines::initialize(const AlgorithmInputParameters& inputParams
   }
 
   if (!inputParamsPtr->m_demRasterPtr || inputParamsPtr->m_demRasterPtr->getAccessPolicy() == te::common::NoAccess)
-  {
-    m_logMsg = "Invalid Raster.";
-
-    return false;
-  }
-
-  if (!inputParamsPtr->m_slopeRasterPtr || inputParamsPtr->m_slopeRasterPtr->getAccessPolicy() == te::common::NoAccess)
   {
     m_logMsg = "Invalid Raster.";
 

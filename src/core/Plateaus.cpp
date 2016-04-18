@@ -141,6 +141,11 @@ bool te::app::Plateaus::execute(AlgorithmOutputParameters& outputParams) throw(t
     return false;
   }
 
+  if (!m_inputParameters.m_slopeRasterPtr)
+  {
+    m_inputParameters.m_slopeRasterPtr  = te::app::CalculateSlope(m_inputParameters.m_demRasterPtr).release();
+  }
+
   //first create escarp raster
   std::auto_ptr<te::rst::Raster> escarpRaster = createSlopeMask(1.);
 
@@ -182,6 +187,9 @@ bool te::app::Plateaus::execute(AlgorithmOutputParameters& outputParams) throw(t
   //create vector representation
   te::app::Raster2Vector(m_outputParametersPtr->m_createdOutRasterPtr.get(), 0,  m_outputParametersPtr->m_createdOutDSName, m_outputParametersPtr->m_createdOutDSType,  m_outputParametersPtr->m_createdOutInfo);
 
+
+  delete m_inputParameters.m_slopeRasterPtr;
+
   return true;
 }
 
@@ -205,13 +213,6 @@ bool te::app::Plateaus::initialize(const AlgorithmInputParameters& inputParams) 
   }
 
   if(!inputParamsPtr->m_demRasterPtr || inputParamsPtr->m_demRasterPtr->getAccessPolicy() == te::common::NoAccess)
-  {
-    m_logMsg = "Invalid Raster.";
-
-    return false;
-  }
-
-  if(!inputParamsPtr->m_slopeRasterPtr || inputParamsPtr->m_slopeRasterPtr->getAccessPolicy() == te::common::NoAccess)
   {
     m_logMsg = "Invalid Raster.";
 

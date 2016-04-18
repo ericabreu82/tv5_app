@@ -70,6 +70,8 @@ namespace te
     */
     APPPLUGINDLLEXPORT void Multi2Single(te::gm::Geometry* g, std::vector<te::gm::Geometry*>& geoms);
 
+    APPPLUGINDLLEXPORT std::auto_ptr<te::rst::Raster> CalculateSlope(te::rst::Raster const* inputRst);
+
   } // end namespace app
 }   // end namespace te
 

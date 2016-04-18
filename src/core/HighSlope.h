@@ -135,10 +135,6 @@ namespace te
 
       protected:
 
-        std::auto_ptr<te::rst::Raster> calculateSlope(te::rst::Raster const* inputRst);
-
-      protected:
-
         HighSlope::InputParameters m_inputParameters;       //!< HighSlope input execution parameters.
 
         HighSlope::OutputParameters* m_outputParametersPtr; //!< HighSlope output execution parameters.

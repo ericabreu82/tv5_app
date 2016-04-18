@@ -64,7 +64,7 @@
                <item row="1" column="0">
                 <layout class="QGridLayout" name="gridLayout_4">
                  <item row="0" column="0">
-                  <widget class="QLabel" name="label_3">
+                  <widget class="QCheckBox" name="m_layerSlopeCheckBox">
                    <property name="text">
                     <string>Layer with raster Slope</string>
                    </property>
@@ -73,7 +73,11 @@
                  <item row="1" column="0">
                   <layout class="QGridLayout" name="gridLayout_3">
                    <item row="0" column="0">
-                    <widget class="QComboBox" name="m_slopeLayerComboBox"/>
+                    <widget class="QComboBox" name="m_slopeLayerComboBox">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
+                    </widget>
                    </item>
                   </layout>
                  </item>
@@ -164,5 +168,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>m_layerSlopeCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>m_slopeLayerComboBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>40</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>49</x>
+     <y>139</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

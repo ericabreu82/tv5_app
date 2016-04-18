@@ -67,8 +67,6 @@ namespace te
 
       public slots:
 
-        void onLayerComboBoxActivated(int index);
-
         void onFileToolButtonClicked();
 
         void execute();

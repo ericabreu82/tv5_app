@@ -36,6 +36,7 @@
 #include <terralib/geometry/GeometryCollection.h>
 #include <terralib/geometry/GeometryProperty.h>
 #include <terralib/qt/widgets/progress/ProgressViewerDialog.h>
+#include <terralib/qt/widgets/Utils.h>
 
 // Qt
 #include <QFileDialog>
@@ -82,7 +83,7 @@ void te::app::WatercourseWidget::setLayerList(std::list<te::map::AbstractLayerPt
 
 void te::app::WatercourseWidget::onFileToolButtonClicked()
 {
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save data to File"), "", tr("Shape File (*.shp *.SHP)"));
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save data to File"), te::qt::widgets::GetFilePathFromSettings("AppPlugin"), tr("Shape File (*.shp *.SHP)"));
 
   if (fileName.isEmpty())
     return;
@@ -91,6 +92,8 @@ void te::app::WatercourseWidget::onFileToolButtonClicked()
 
   if(file.suffix().isEmpty())
     fileName.append(".shp");
+
+  te::qt::widgets::AddFilePathToSettings(file.absolutePath(), "AppPlugin");
 
   m_ui->m_fileLineEdit->setText(fileName);
 }

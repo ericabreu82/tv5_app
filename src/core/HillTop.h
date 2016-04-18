@@ -73,7 +73,7 @@ namespace te
 
             te::rst::Raster const* m_demRasterPtr;      //!< Input raster for dem information
 
-            te::rst::Raster const* m_slopeRasterPtr;    //!< Input raster for slope information
+            te::rst::Raster* m_slopeRasterPtr;    //!< Input raster for slope information
 
             te::gm::MultiLineString* m_contourLines;    //!< Input level curves
 

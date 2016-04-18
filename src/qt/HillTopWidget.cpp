@@ -37,6 +37,7 @@
 #include <terralib/geometry/MultiPolygon.h>
 #include <terralib/raster/Grid.h>
 #include <terralib/qt/widgets/progress/ProgressViewerDialog.h>
+#include <terralib/qt/widgets/Utils.h>
 
 // Qt
 #include <QFileDialog>
@@ -88,7 +89,7 @@ void te::app::HillTopWidget::setLayerList(std::list<te::map::AbstractLayerPtr>& 
 
 void te::app::HillTopWidget::onFileToolButtonClicked()
 {
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save data to File"), "", tr("Shape File (*.shp *.SHP)"));
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save data to File"), te::qt::widgets::GetFilePathFromSettings("AppPlugin"), tr("Shape File (*.shp *.SHP)"));
 
   if (fileName.isEmpty())
     return;
@@ -97,6 +98,8 @@ void te::app::HillTopWidget::onFileToolButtonClicked()
 
   if(file.suffix().isEmpty())
     fileName.append(".shp");
+
+  te::qt::widgets::AddFilePathToSettings(file.absolutePath(), "AppPlugin");
 
   m_ui->m_fileLineEdit->setText(fileName);
 }
@@ -305,33 +308,6 @@ void te::app::HillTopWidget::execute()
       rasterSRTM->getGrid()->setSRID(layer->getSRID());
   }
 
-  int idxSlope = m_ui->m_slopeLayerComboBox->currentIndex();
-  QVariant varSlopeLayer = m_ui->m_slopeLayerComboBox->itemData(idxSlope, Qt::UserRole);
-  te::map::AbstractLayerPtr slopeLayer = varSlopeLayer.value<te::map::AbstractLayerPtr>();
-
-  if(!slopeLayer.get())
-  {
-    QMessageBox::warning(this, tr("Warning"), tr("Invalid Slope layer selected."));
-    return;
-  }
-
-  std::auto_ptr<te::da::DataSet> slopeDs = slopeLayer->getData();
-  std::size_t slopePos = te::da::GetFirstPropertyPos(slopeDs.get(), te::dt::RASTER_TYPE);
-  std::auto_ptr<te::rst::Raster> slopeRst = slopeDs->getRaster(slopePos);
-
-  if(!slopeRst.get())
-  {
-    QMessageBox::warning(this, tr("Warning"), tr("Selected Slope layer does not have raster representation."));
-    return;
-  }
-
-  te::rst::Raster* rasterSlope = slopeRst.get();
-
-  if (rasterSlope->getSRID() == 0) {
-      // Gets SRID from layer object
-      rasterSlope->getGrid()->setSRID(slopeLayer->getSRID());
-  }
-
   // get input geometries
   te::gm::MultiLineString* contourLines = layerToMultiLine(m_ui->m_contourLayerComboBox, "Contour Lines");
   te::gm::MultiLineString* drainage = layerToMultiLine(m_ui->m_drainageLayerComboBox, "Drainage");
@@ -354,13 +330,45 @@ void te::app::HillTopWidget::execute()
     // create ridge lines algorithm parameters
     te::app::HillTop::InputParameters inputParameters;
     inputParameters.m_demRasterPtr = rasterSRTM;
-    inputParameters.m_slopeRasterPtr = rasterSlope;
     inputParameters.m_contourLines = contourLines;
     inputParameters.m_drainage = drainage;
     inputParameters.m_watersheds = watersheds;
     inputParameters.m_watershedsBuffer = watershedsBuffer;
     inputParameters.m_height = heightValue;
     inputParameters.m_slope = slopeValue;
+
+    if (m_ui->m_layerSlopeCheckBox->isChecked())
+    {
+      int idxSlope = m_ui->m_slopeLayerComboBox->currentIndex();
+      QVariant varSlopeLayer = m_ui->m_slopeLayerComboBox->itemData(idxSlope, Qt::UserRole);
+      te::map::AbstractLayerPtr slopeLayer = varSlopeLayer.value<te::map::AbstractLayerPtr>();
+
+      if (!slopeLayer.get())
+      {
+        QMessageBox::warning(this, tr("Warning"), tr("Invalid Slope layer selected."));
+        return;
+      }
+
+      std::auto_ptr<te::da::DataSet> slopeDs = slopeLayer->getData();
+      std::size_t slopePos = te::da::GetFirstPropertyPos(slopeDs.get(), te::dt::RASTER_TYPE);
+      std::auto_ptr<te::rst::Raster> slopeRst = slopeDs->getRaster(slopePos);
+
+      if (!slopeRst.get())
+      {
+        QMessageBox::warning(this, tr("Warning"), tr("Selected Slope layer does not have raster representation."));
+        return;
+      }
+
+      te::rst::Raster* rasterSlope = slopeRst.release();
+
+      if (rasterSlope->getSRID() == 0) 
+      {
+        // Gets SRID from layer object
+        rasterSlope->getGrid()->setSRID(slopeLayer->getSRID());
+      }
+
+      inputParameters.m_slopeRasterPtr = rasterSlope;
+    }
 
     te::app::HillTop::OutputParameters outputParameters;
     outputParameters.m_createdOutDSName = dataSetName;
