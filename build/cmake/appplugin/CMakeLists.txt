@@ -46,22 +46,36 @@ set(APPPLG_FILES ${APPPLG_SRC_FILES}
 				   ${APPPLG_QT_HDR_FILES}
 				   ${APPPLG_GEN_HDR_FILES})
 				   
+set(APPPLG_HDR_FILES ${APPPLG_HDR_FILES} 
+				     ${APPPLG_CORE_HDR_FILES} 
+				     ${APPPLG_QT_HDR_FILES}
+				     ${APPPLG_GEN_HDR_FILES})
+				   
 add_library(app_plugin SHARED ${APPPLG_FILES})
 
 target_link_libraries(app_plugin terralib_mod_plugin terralib_mod_qt_apf)
 
+set_target_properties(app_plugin
+                      PROPERTIES VERSION ${APPPLUGIN_VERSION_MAJOR}.${APPPLUGIN_VERSION_MINOR}
+                                 SOVERSION ${APPPLUGIN_VERSION_MAJOR}.${APPPLUGIN_VERSION_MINOR})
+
 qt5_use_modules(app_plugin Widgets)
 
-add_custom_command(
-      TARGET app_plugin
-      POST_BUILD
-	  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_BINARY_DIR}/bin/Debug/app_plugind.dll" "${terralib_DIR}/debug"
-      
-      COMMENT "Copying plugin files..."
-      VERBATIM
-    )
-
 install(TARGETS app_plugin
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+        EXPORT app-targets
+        RUNTIME DESTINATION ${APPPLUGIN_DESTINATION_RUNTIME} COMPONENT runtime
+        LIBRARY DESTINATION ${APPPLUGIN_DESTINATION_LIBRARY} COMPONENT runtime
+        ARCHIVE DESTINATION ${APPPLUGIN_DESTINATION_ARCHIVE} COMPONENT runtime)
+
+install(FILES ${APPPLG_HDR_FILES}
+        DESTINATION ${APPPLUGIN_DESTINATION_HEADERS}/app_plugin COMPONENT devel)
+
+export(TARGETS app_plugin APPEND FILE ${CMAKE_BINARY_DIR}/app-exports.cmake)
+
+#add_custom_command(
+#    TARGET app_plugin
+#    POST_BUILD
+#	COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_BINARY_DIR}/bin/Debug/app_plugind.dll" "${terralib_DIR}/debug"
+#    COMMENT "Copying plugin files..."
+#    VERBATIM
+#)

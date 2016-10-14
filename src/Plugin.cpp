@@ -24,8 +24,8 @@
 */
 
 // TerraLib
-#include <terralib/common/Translator.h>
-#include <terralib/common/Logger.h>
+#include <terralib/core/translator/Translator.h>
+#include <terralib/core/logger/Logger.h>
 #include <terralib/qt/af/ApplicationController.h>
 
 #include "AppMainWindowAction.h"
